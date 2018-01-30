@@ -4,14 +4,15 @@
 #ifndef P_STATS_C
 #define P_STATS_C
 
-struct Permute make_permutator(int size) {
+struct Permute create_permutator(int size) {
 	int index;
 	struct Permute permute;
 
-	permute.swap[0] = 0;
-	permute.swap[1] = 0;
 	permute.size = size;
-	permute.counter = size;
+	permute.stack = 0;
+	permute.iter = malloc(size * sizeof(int));
+	for (index = 0; index < size - 1; index++)
+		permute.iter[index] = 0;
 
 	permute.options = malloc(size * sizeof(int));
 	for (index = 0; index < size; index++)
@@ -22,29 +23,35 @@ struct Permute make_permutator(int size) {
 
 int next_permutation(struct Permute *permute) {
 	int tmp;
-	int can_continue = 1;
 
-	permute->swap[1]++;
-	if (permute->swap[1] == permute->size) {
-		permute->swap[0]++;
-		permute->swap[0] %= permute->size - 1;
-		permute->swap[1] = permute->swap[0] + 1;
-		permute->swap[1] %= permute->size;
+	if (permute->iter[permute->stack] < permute->stack) {
+		if (permute->stack % 2 == 0) {
+			tmp = permute->options[0];
+			permute->options[0] = permute->options[permute->stack];
+			permute->options[permute->stack] = tmp;
+		}
+		else {
+			tmp = permute->options[permute->iter[permute->stack]];
+			permute->options[permute->iter[permute->stack]] = permute->options[permute->stack];
+			permute->options[permute->stack] = tmp;
+		}
+		permute->iter[permute->stack]++;
+		permute->stack = 0;
+		return 1;
 	}
-
-	tmp = permute->options[permute->swap[0]];
-	permute->options[permute->swap[0]] = permute->options[permute->swap[1]];
-	permute->options[permute->swap[1]] = tmp;
-
-	if (permute->swap[0] == 0 && permute->swap[1] == 1)
-		permute->counter--;
-	can_continue = permute->counter >= 0;
-
-	return can_continue;
+	else {
+		permute->iter[permute->stack] = 0;
+		permute->stack++;
+		if (permute->stack < permute->size)
+			return next_permutation(permute);
+		else
+			return 0;
+	}
 }
 
 void delete_permutator(struct Permute *permute) {
 	free(permute->options);
+	free(permute->iter);
 }
 
 #endif

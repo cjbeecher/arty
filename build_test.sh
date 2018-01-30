@@ -1,4 +1,4 @@
 make clean
-make stats_test
+make matrix_test
 python3 test/matrix.py
-./build/stats_test
+./build/matrix_test

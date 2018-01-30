@@ -26,7 +26,7 @@ STATSTESTC=test/stats.c
 STATSTEST=-o build/stats_test
 
 matrix_test : matrix
-	$(CC) $(INCLUDE) -fPIC -g $(MATRIXTESTC) $(MATRIXTEST) $(MATRIXSO) -lm
+	$(CC) $(INCLUDE) -fPIC -g $(MATRIXTESTC) $(MATRIXTEST) $(MATRIXSO) $(STATSSO) -lm
 
 stats_test : stats
 	$(CC) $(INCLUDE) -fPIC -g $(STATSTESTC) $(STATSTEST) $(STATSSO) -lm

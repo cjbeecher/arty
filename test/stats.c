@@ -4,16 +4,16 @@
 int main() {
 	int limit = 0;
 	int index;
-	struct Permute permute = make_permutator(4);
+	struct Permute permute = create_permutator(4);
 
-	while (next_permutation(&permute) && limit < 30) {
-		printf("%i, %i : ", limit+1, permute.counter);
+	do {
+		printf("%i, %i : ", limit+1, permute.stack);
 		for (index = 0; index < permute.size; index++)
 			printf("%i,", permute.options[index]);
-		printf(" = %i,%i", permute.swap[0], permute.swap[1]);
+		printf(" = %i,%i", permute.iter[permute.stack], permute.stack);
 		printf("\n");
 		limit++;
-	}
+	} while (next_permutation(&permute) && limit < 30);
 
 	return 1;
 }

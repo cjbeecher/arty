@@ -32,13 +32,20 @@ double determinant(struct Matrix *matrix) {
 	double term;
 	int h_index = 0;
 	int w_index = 0;
+	int counter = 0;
+	struct Permute permute = create_permutator(matrix->w);
 
 	do {
-		w_index++;
-		w_index %= matrix->w;
-		if (w_index == 0) h_index++;
-		h_index %= matrix->h;
-	} while (h_index > 0 && w_index > 0);
+		term = 1.0;
+		w_index = 0;
+		for (h_index = 0; h_index < matrix->h; h_index++) {
+			term *= *matrix->values[permute.options[w_index]][h_index];
+			w_index++;
+		}
+		term *= counter % 2 == 1 ? -1.0 : 1.0;
+		det += term;
+		counter++;
+	} while (next_permutation(&permute));
 
 	return det;
 }

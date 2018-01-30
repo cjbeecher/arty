@@ -5,11 +5,11 @@
 struct Permute {
 	int *options;
 	int size;
-	int swap[2];
-	int counter;
+	int stack;
+	int *iter;
 };
 
-struct Permute make_permutator(int size);
+struct Permute create_permutator(int size);
 int next_permutation(struct Permute *permute);
 void delete_permutator(struct Permute *permute);
 
