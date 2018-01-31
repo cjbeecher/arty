@@ -22,6 +22,8 @@ int main() {
 	*matrix.values[3][3] = 7.0;
 	print_matrix(&matrix);
 	printf("%f\n", determinant(&matrix));
+	invert(&matrix);
+	print_matrix(&matrix);
 
 	delete_matrix(&matrix);
 	return 0;

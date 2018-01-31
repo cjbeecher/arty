@@ -7,6 +7,8 @@
 #ifndef P_MATRIX_C
 #define P_MATRIX_C
 
+#define ZERO 0.0000000001
+
 struct Matrix create_matrix(int h, int w, int populate) {
 	int h_index;
 	int w_index;
@@ -25,6 +27,32 @@ struct Matrix create_matrix(int h, int w, int populate) {
 	matrix.is_populated = populate;
 
 	return matrix;
+}
+
+void delete_matrix(struct Matrix *matrix) {
+	int h_index;
+	int w_index;
+
+	for (h_index = 0; h_index < matrix->h; h_index++) {
+		if (matrix->is_populated)
+			for (w_index = 0; w_index < matrix->w; w_index++)
+				free(matrix->values[h_index][w_index]);
+		free(matrix->values[h_index]);
+	}
+	free(matrix->values);
+
+	return;
+}
+
+void copy_matrix(struct Matrix *matrix, struct Matrix *copy) {
+	int h_index;
+	int w_index;
+
+	for (h_index = 0; h_index < copy->h; h_index++) {
+		for (w_index = 0; w_index < copy->w; w_index++) {
+			*copy->values[h_index][w_index] = *matrix->values[h_index][w_index];
+		}
+	}
 }
 
 double determinant(struct Matrix *matrix) {
@@ -50,19 +78,86 @@ double determinant(struct Matrix *matrix) {
 	return det;
 }
 
-void delete_matrix(struct Matrix *matrix) {
+int set_minor(struct Matrix *matrix, struct Matrix *minor, int h, int w) {
+	int h_major;
+	int w_major;
+	int h_minor;
+	int w_minor;
+
+	if (matrix->h != minor->h + 1 || matrix->w != minor->w + 1)
+		return 0;
+
+	h_minor = 0;
+	for (h_major = 0; h_major < matrix->h; h_major++) {
+		if (h_major == h) continue;
+		w_minor = 0;
+		for (w_major = 0; w_major < matrix->w; w_major++) {
+			if (w_major == w) continue;
+			*minor->values[h_minor][w_minor] = *matrix->values[h_major][w_major];
+			w_minor++;
+		}
+		h_minor++;
+	}
+
+	return 1;
+}
+
+void minors(struct Matrix *matrix) {
+	double minor_det;
 	int h_index;
 	int w_index;
+	struct Matrix minor = create_matrix(matrix->h - 1, matrix->w - 1, 1);
+	struct Matrix copy = create_matrix(matrix->h, matrix->w, 1);
 
 	for (h_index = 0; h_index < matrix->h; h_index++) {
-		if (matrix->is_populated)
-			for (w_index = 0; w_index < matrix->w; w_index++)
-				free(matrix->values[h_index][w_index]);
-		free(matrix->values[h_index]);
+		for (w_index = 0; w_index < matrix->w; w_index++) {
+			set_minor(matrix, &minor, h_index, w_index);
+			minor_det = determinant(&minor);
+			*copy.values[h_index][w_index] = minor_det;
+		}
 	}
-	free(matrix->values);
 
-	return;
+	copy_matrix(&copy, matrix);
+	delete_matrix(&copy);
+	delete_matrix(&minor);
+}
+
+void adjugate_cofactors(struct Matrix *matrix) {
+	int h_index;
+	int w_index;
+	double tmp;
+
+	for (h_index = 0; h_index < matrix->h; h_index++) {
+		for (w_index = h_index + 1; w_index < matrix->w; w_index++) {
+			tmp = *matrix->values[h_index][w_index];
+			if ((w_index - h_index) % 2 == 1) {
+				tmp *= -1.0;
+				*matrix->values[w_index][h_index] *= -1.0;
+			}
+			*matrix->values[h_index][w_index] = *matrix->values[w_index][h_index];
+			*matrix->values[w_index][h_index] = tmp;
+		}
+	}
+}
+
+int invert(struct Matrix *matrix) {
+	int h_index;
+	int w_index;
+	double det = determinant(matrix);
+
+	if (det > ZERO && det < -ZERO)
+		return 0;
+
+	minors(matrix);
+	adjugate_cofactors(matrix);
+
+	for (h_index = 0; h_index < matrix->h; h_index++) {
+		for (w_index = 0; w_index < matrix->w; w_index++) {
+			*matrix->values[h_index][w_index] /= det;
+		}
+	}
+
+	return 1;
 }
 
 void print_matrix(struct Matrix *matrix) {
