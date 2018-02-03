@@ -13,6 +13,8 @@ struct Matrix create_matrix(int h, int w, int populate);
 void delete_matrix(struct Matrix *matrix);
 void copy_matrix(struct Matrix *matrix, struct Matrix *copy);
 
+struct Matrix multiply_matrix(struct Matrix *left, struct Matrix *right);
+
 double determinant(struct Matrix *matrix);
 // Minor matrix is placed into minor
 int set_minor(struct Matrix *matrix, struct Matrix *minor, int h, int w);

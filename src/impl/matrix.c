@@ -29,6 +29,26 @@ struct Matrix create_matrix(int h, int w, int populate) {
 	return matrix;
 }
 
+struct Matrix multiply_matrix(struct Matrix *left, struct Matrix *right) {
+	int h_index;
+	int w_index;
+	int w_out;
+	double sum;
+	struct Matrix output = create_matrix(left->h, right->w, 1);
+
+	for (h_index = 0; h_index < left->h; h_index++) {
+		for (w_out = 0; w_out < right->w; w_out++) {
+			sum = 0;
+			for (w_index = 0; w_index < left->w; w_index++) {
+				sum += *left->values[h_index][w_index] * *right->values[w_index][w_out];
+			}
+			*output.values[h_index][w_out] = sum;
+		}
+	}
+
+	return output;
+}
+
 void delete_matrix(struct Matrix *matrix) {
 	int h_index;
 	int w_index;
