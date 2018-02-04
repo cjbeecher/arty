@@ -49,6 +49,36 @@ struct Matrix multiply_matrix(struct Matrix *left, struct Matrix *right) {
 	return output;
 }
 
+struct Matrix add_matrix(struct Matrix *left, struct Matrix *right, int put_left) {
+	int h_index;
+	int w_index;
+	struct Matrix output;
+
+	if (put_left) output = *left;
+	else output = create_matrix(left->h, left->w, 1);
+
+	for (h_index = 0; h_index < left->h; h_index++)
+		for (w_index = 0; w_index < left->w; w_index++)
+			*output.values[h_index][w_index] = *left->values[h_index][w_index] + *right->values[h_index][w_index];
+
+	return output;
+}
+
+struct Matrix subtract_matrix(struct Matrix *left, struct Matrix *right, int put_left) {
+	int h_index;
+	int w_index;
+	struct Matrix output;
+
+	if (put_left) output = *left;
+	else output = create_matrix(left->h, left->w, 1);
+
+	for (h_index = 0; h_index < left->h; h_index++)
+		for (w_index = 0; w_index < left->w; w_index++)
+			*output.values[h_index][w_index] = *left->values[h_index][w_index] - *right->values[h_index][w_index];
+
+	return output;
+}
+
 void delete_matrix(struct Matrix *matrix) {
 	int h_index;
 	int w_index;

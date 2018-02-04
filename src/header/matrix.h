@@ -14,6 +14,8 @@ void delete_matrix(struct Matrix *matrix);
 void copy_matrix(struct Matrix *matrix, struct Matrix *copy);
 
 struct Matrix multiply_matrix(struct Matrix *left, struct Matrix *right);
+struct Matrix add_matrix(struct Matrix *left, struct Matrix *right, int put_left);
+struct Matrix subtract_matrix(struct Matrix *left, struct Matrix *right, int put_left);
 
 double determinant(struct Matrix *matrix);
 // Minor matrix is placed into minor
