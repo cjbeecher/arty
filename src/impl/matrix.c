@@ -79,6 +79,16 @@ struct Matrix subtract_matrix(struct Matrix *left, struct Matrix *right, int put
 	return output;
 }
 
+void apply_function(struct Matrix *matrix, double (*handle)(double)) {
+	int h_index;
+	int w_index;
+	struct Matrix output;
+
+	for (h_index = 0; h_index < matrix->h; h_index++)
+		for (w_index = 0; w_index < matrix->w; w_index++)
+			*matrix->values[h_index][w_index] = (*handle)(*matrix->values[h_index][w_index]);
+}
+
 void delete_matrix(struct Matrix *matrix) {
 	int h_index;
 	int w_index;

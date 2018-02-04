@@ -17,6 +17,8 @@ struct Matrix multiply_matrix(struct Matrix *left, struct Matrix *right);
 struct Matrix add_matrix(struct Matrix *left, struct Matrix *right, int put_left);
 struct Matrix subtract_matrix(struct Matrix *left, struct Matrix *right, int put_left);
 
+void apply_function(struct Matrix *matrix, double (*handle)(double));
+
 double determinant(struct Matrix *matrix);
 // Minor matrix is placed into minor
 int set_minor(struct Matrix *matrix, struct Matrix *minor, int h, int w);
