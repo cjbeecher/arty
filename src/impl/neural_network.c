@@ -44,7 +44,7 @@ void initialize_weights(struct NeuralNetwork *nn) {
 	for (index = 0; index < nn->layer_count + 1; index++)
 		randomize_matrix(&nn->weights[index], RADIAL_RANGE);
 }
-#include <stdio.h>
+
 struct Matrix process_data(struct NeuralNetwork *nn, struct Matrix *input) {
 	int index;
 	struct Matrix tmp;
