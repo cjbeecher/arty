@@ -1,13 +1,19 @@
 #include "matrix.h"
 #include "neural_network.h"
 #include <stdio.h>
+#include <math.h>
 
 #define SIZE 1
+
+double af(double value) {
+	return 1 / (1 + exp(-1.0 * value));
+}
 
 int main() {
 	int index;
 	int size[SIZE] = {2};
-	struct NeuralNetwork nn = create_feedforward_nn(2, 1, 1, size);
+	struct NeuralNetwork nn = create_feedforward_nn(2, 1, 1, size, &af);
+	struct Matrix output;
 	struct Matrix matrix = create_matrix(4, 2, 1);
 
 	*matrix.values[0][0] = 10.123456;
@@ -21,12 +27,19 @@ int main() {
 
 	initialize_weights(&nn);
 
-	for (index = 0; index < SIZE; index++)
-		print_matrix(&nn.weights[index]);
-	printf("\n");
 	print_matrix(&matrix);
+	printf("\n");
+	for (index = 0; index < SIZE + 1; index++) {
+		print_matrix(&nn.weights[index]);
+		printf("\n");
+	}
+	output = process_data(&nn, &matrix);
+	print_matrix(&output);
 
+	printf("\n");
+	delete_matrix(&output);
 	delete_feedforward_nn(&nn);
+
 	return 0;
 }
 
