@@ -58,6 +58,7 @@ struct Matrix process_data(struct NeuralNetwork *nn, struct Matrix *input) {
 		output = tmp;
 	}
 	tmp = multiply_matrix(&output, &nn->weights[index]);
+	delete_matrix(&output);
 	output = tmp;
 
 	return output;
