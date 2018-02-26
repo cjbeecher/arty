@@ -15,6 +15,12 @@ GRAPHSO=build/libgraph.so
 NN=src/impl/neural_network.c
 NNO=build/libnn.o
 NNSO=build/libnn.so
+NNOPTI=src/impl/nnopti.c
+NNOPTIO=build/nnopti.o
+NNOPTISO=build/nnopti.so
+NNACTIV=src/impl/nnactiv.c
+NNACTIVO=build/nnactiv.o
+NNACTIVSO=build/nnactiv.so
 
 stats :
 	$(CC) $(INCLUDE) $(COMPILEO) $(STATS) -o $(STATSO)
@@ -31,10 +37,20 @@ graph :
 	$(CC) $(GRAPHO) $(SO) $(GRAPHSO)
 	rm $(GRAPHO)
 
-neural : graph matrix
+neural : matrix
 	$(CC) $(INCLUDE) $(COMPILEO) $(NN) -o $(NNO)
 	$(CC) $(NNO) $(SO) $(NNSO)
 	rm $(NNO)
+
+nnopti : neural
+	$(CC) $(INCLUDE) $(COMPILEO) $(NNOPTI) -o $(NNOPTIO)
+	$(CC) $(NNOPTIO) $(SO) $(NNOPTISO)
+	rm $(NNOPTIO)
+
+nnactiv: matrix
+	$(CC) $(INCLUDE) $(COMPILEO) $(NNACTIV) -o $(NNACTIVO)
+	$(CC) $(NNACTIVO) $(SO) $(NNACTIVSO)
+	rm $(NNACTIVO)
 
 MATRIXTESTC=test/matrix.c
 MATRIXTEST=-o build/matrix_test
@@ -52,8 +68,8 @@ stats_test : stats
 graph_test : graph
 	$(CC) $(INCLUDE) -fPIC -g $(GRAPHTESTC) $(GRAPHTEST) $(GRAPHSO) -lm
 
-nn_test : neural
-	$(CC) $(INCLUDE) -fPIC -g $(NNTESTC) $(NNTEST) $(NNSO) $(MATRIXSO) $(STATSSO) -lm
+nn_test : neural nnopti nnactiv
+	$(CC) $(INCLUDE) -fPIC -g $(NNTESTC) $(NNTEST) $(NNSO) $(NNOPTISO) $(NNACTIVSO) $(MATRIXSO) $(STATSSO) -lm
 
 clean :
 	rm build/*

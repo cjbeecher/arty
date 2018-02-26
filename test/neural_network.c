@@ -1,29 +1,25 @@
 #include "matrix.h"
+#include "nnactiv.h"
 #include "neural_network.h"
 #include <stdio.h>
-#include <math.h>
 
 #define SIZE 1
-
-double af(double value) {
-	return 1 / (1 + exp(-1.0 * value));
-}
 
 int main() {
 	int index;
 	int size[SIZE] = {2};
-	struct NeuralNetwork nn = create_feedforward_nn(2, 1, 1, size, &af);
+	struct NeuralNetwork nn = create_feedforward_nn(2, 1, 1, size, &sigmoid);
 	struct Matrix output;
-	struct Matrix matrix = create_matrix(4, 2, 1);
+	struct Matrix matrix = create_matrix(4, 2);
 
-	*matrix.values[0][0] = 10.123456;
-	*matrix.values[1][0] = 2.16;
-	*matrix.values[2][0] = 3.13456;
-	*matrix.values[0][1] = 4.123456;
-	*matrix.values[1][1] = 5.123456;
-	*matrix.values[2][1] = 6.123456;
-	*matrix.values[3][0] = 4.0;
-	*matrix.values[3][1] = 5.0;
+	matrix.values[0][0] = 10.123456;
+	matrix.values[1][0] = 2.16;
+	matrix.values[2][0] = 3.13456;
+	matrix.values[0][1] = 4.123456;
+	matrix.values[1][1] = 5.123456;
+	matrix.values[2][1] = 6.123456;
+	matrix.values[3][0] = 4.0;
+	matrix.values[3][1] = 5.0;
 
 	initialize_weights(&nn);
 

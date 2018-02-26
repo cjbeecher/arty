@@ -3,13 +3,12 @@
 #define P_MATRIX_H
 
 struct Matrix {
-	double ***values;
-	int is_populated;
+	double **values;
 	int w;
 	int h;
 };
 
-struct Matrix create_matrix(int h, int w, int populate);
+struct Matrix create_matrix(int h, int w);
 void delete_matrix(struct Matrix *matrix);
 void copy_matrix(struct Matrix *matrix, struct Matrix *copy);
 
@@ -20,6 +19,7 @@ struct Matrix subtract_matrix(struct Matrix *left, struct Matrix *right, int put
 void randomize_matrix(struct Matrix *matrix, double range);
 void apply_function(struct Matrix *matrix, double (*handle)(double));
 
+void transpose(struct Matrix *matrix);
 double determinant(struct Matrix *matrix);
 // Minor matrix is placed into minor
 int set_minor(struct Matrix *matrix, struct Matrix *minor, int h, int w);

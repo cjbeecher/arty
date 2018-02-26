@@ -21,10 +21,10 @@ struct NeuralNetwork create_feedforward_nn(int input, int output, int layers, in
 
 	prev_size = input;
 	for (index = 0; index < layers; index++) {
-		nn.weights[index] = create_matrix(prev_size, layer_sizes[index], 1);
+		nn.weights[index] = create_matrix(prev_size, layer_sizes[index]);
 		prev_size = layer_sizes[index];
 	}
-	nn.weights[index] = create_matrix(prev_size, output, 1);
+	nn.weights[index] = create_matrix(prev_size, output);
 
 	return nn;
 }
