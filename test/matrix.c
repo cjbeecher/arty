@@ -1,7 +1,11 @@
 #include "matrix.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 int main() {
+	int index;
+	struct Matrix *column_product;
+	struct Matrix fin;
 	struct Matrix matrix = create_matrix(4, 4);
 	struct Matrix right = create_matrix(4, 4);
 
@@ -46,8 +50,21 @@ int main() {
 	printf("\n");
 	print_matrix(&matrix);
 
+	column_product = column_element_product(&matrix, &right);
+	fin = column_element_multiply(&matrix, column_product);
+	printf("----------\n");
+	print_matrix(&fin);
+	printf("==========\n");
+	for (index = 0; index < matrix.w; index++) {
+		print_matrix(&column_product[index]);
+		delete_matrix(&column_product[index]);
+		printf("\n");
+	}
+	free(column_product);
+
 	delete_matrix(&matrix);
 	delete_matrix(&right);
+
 	return 0;
 }
 

@@ -75,6 +75,47 @@ struct Matrix subtract_matrix(struct Matrix *left, struct Matrix *right, int put
 	return output;
 }
 
+struct Matrix *column_element_product(struct Matrix *left, struct Matrix *right) {
+	int index;
+	int h_index;
+	int w_index;
+	struct Matrix *out;
+
+	if (left->h != right->h) return 0;
+
+	out = malloc(sizeof(struct Matrix) * left->w);
+	for (index = 0; index < left->w; index++) {
+		out[index] = create_matrix(right->h, right->w);
+		for (h_index = 0; h_index < right->h; h_index++) {
+			for (w_index = 0; w_index < right->w; w_index++) {
+				out[index].values[h_index][w_index] = left->values[index][h_index] * right->values[w_index][h_index];
+			}
+		}
+	}
+
+	return out;
+}
+
+struct Matrix column_element_multiply(struct Matrix *matrix, struct Matrix *column_product) {
+	int index;
+	int h_index;
+	int w_index;
+	struct Matrix *tmp;
+	struct Matrix out = create_matrix(matrix->h, column_product[0].w);
+
+	for (index = 0; index < matrix->h; index++) {
+		tmp = &column_product[index];
+		for (w_index = 0; w_index < tmp->w; w_index++) {
+			out.values[index][w_index] = 0.0;
+			for (h_index = 0; h_index < tmp->h; h_index++) {
+				out.values[index][w_index] += matrix->values[index][h_index] * tmp->values[h_index][w_index];
+			}
+		}
+	}
+
+	return out;
+}
+
 void randomize_matrix(struct Matrix *matrix, double range) {
 	int h_index;
 	int w_index;

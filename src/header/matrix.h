@@ -16,6 +16,11 @@ struct Matrix multiply_matrix(struct Matrix *left, struct Matrix *right);
 struct Matrix add_matrix(struct Matrix *left, struct Matrix *right, int put_left);
 struct Matrix subtract_matrix(struct Matrix *left, struct Matrix *right, int put_left);
 
+// Tuple of matrices in which the tuple size = left->w
+// If left->h != right->h then 0 is returned
+struct Matrix *column_element_product(struct Matrix *left, struct Matrix *right);
+struct Matrix column_element_multiply(struct Matrix *matrix, struct Matrix *column_product);
+
 void randomize_matrix(struct Matrix *matrix, double range);
 void apply_function(struct Matrix *matrix, double (*handle)(double));
 
