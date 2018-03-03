@@ -4,21 +4,23 @@
 #ifndef P_NNOPTI_C
 #define P_NNOPTI_C
 
-int quasi_newton_optimizer(struct Params *params) {
+// ap1 = z0p (a0p * w1)
+struct Matrix activity_prime(struct Matrix *a, struct Matrix *a_prime, struct Matrix *w) {
+	struct Matrix out = create_matrix(a->h, 
+}
+
+struct Matrix *nn_first_der_activity(struct NeuralNetwork *nn, struct Matrix *input, struct *output) {
 	int index;
-	int inter = params->nn->layer_count - 1;
-	struct Matrix *activities = malloc(sizeof(struct Matrix) * size);
-	struct Matrix *activity_primes = malloc(sizeof(struct Matrix) * size);
+	struct Matrix *der = malloc((struct Matrix) * sizeof(nn->layer_count));
 
-	for (index = 0; index < inter; index++) {
-		params->nn->layer_count = index;
-		activities[index] = process_data(params->nn, params->input);
+	der[index] = create_matrix(input->h, nn->weights[index]->w);
+	for (index = 1; index < nn->layer_count; index++) {
 	}
-	params->nn->layer_count++;
 
-	for (index = 0; index < inter; index++) {
-		delete_matrix(activities[index]);
-	}
+	return der;
+}
+
+int nn_quasi_newton_optimizer(struct Params *params) {
 
 	return 0;
 }

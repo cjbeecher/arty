@@ -4,7 +4,7 @@
 #ifndef P_NNOPTI_H
 #define P_NNOPTI_H
 
-struct Params {
+struct NNParams {
 	struct Matrix *input;
 	struct Matrix *output;
 	struct NeuralNetwork *nn;
@@ -14,7 +14,7 @@ struct Params {
 // 0 - Successful convergence
 // 1 - Non-convergent
 // 2 - Divergent solution
-int quasi_newton_optimizer(struct Params *params);
+int nn_quasi_newton_optimizer(struct Params *params);
 
 #endif
 
