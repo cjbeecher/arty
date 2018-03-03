@@ -1,3 +1,3 @@
 make clean
-make nn_test
-./build/nn_test
+make matrix_test
+./build/matrix_test
