@@ -25,6 +25,20 @@ struct Matrix create_matrix(int h, int w) {
 	return matrix;
 }
 
+struct Matrix create_matrix_zeroes(int h, int w) {
+	int h_index;
+	int w_index;
+	struct Matrix matrix = create_matrix(h, w);
+
+	for (h_index = 0; h_index < h; h_index++) {
+		for (w_index = 0; w_index < w; w_index++) {
+			matrix.values[h_index][w_index] = 0.0;
+		}
+	}
+
+	return matrix;
+}
+
 struct Matrix multiply_matrix(struct Matrix *left, struct Matrix *right) {
 	int h_index;
 	int w_index;

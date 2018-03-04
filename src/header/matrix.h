@@ -9,6 +9,7 @@ struct Matrix {
 };
 
 struct Matrix create_matrix(int h, int w);
+struct Matrix create_matrix_zeroes(int h, int w);
 void delete_matrix(struct Matrix *matrix);
 void copy_matrix(struct Matrix *matrix, struct Matrix *copy);
 
