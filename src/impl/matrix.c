@@ -172,7 +172,7 @@ void copy_matrix(struct Matrix *matrix, struct Matrix *copy) {
 	}
 }
 
-void transpose(struct Matrix *matrix) {
+struct Matrix transpose(struct Matrix *matrix) {
 	int h_index;
 	int w_index;
 	struct Matrix trans = create_matrix(matrix->w, matrix->h);
@@ -185,10 +185,8 @@ void transpose(struct Matrix *matrix) {
 			trans.values[h_index][w_index] = matrix->values[w_index][h_index];
 		}
 	}
-	delete_matrix(matrix);
-	matrix->values = trans.values;
-	matrix->h = trans.h;
-	matrix->w = trans.w;
+
+	return trans;
 }
 
 double determinant(struct Matrix *matrix) {
