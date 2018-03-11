@@ -14,15 +14,16 @@ vsplit test/stats.c
 split src/header/stats.h
 
 tabe src/impl/neural_network.c
-vsplit test/neural_network.c
-split src/header/neural_network.h
+" vsplit test/neural_network.c
+vsplit src/header/neural_network.h
 
 " tabe src/impl/graph.c
 " vsplit test/graph.c
 " split src/header/graph.h
 
 tabe src/impl/nnopti.c
-vsplit src/header/nnopti.h
+vsplit test/neural_network.c
+split src/header/nnopti.h
 
 tabe src/impl/nnactiv.c
 vsplit src/header/nnactiv.h

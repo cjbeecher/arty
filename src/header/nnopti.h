@@ -14,7 +14,7 @@ struct NNParams {
 // 0 - Successful convergence
 // 1 - Non-convergent
 // 2 - Divergent solution
-int nn_quasi_newton_optimizer(struct Params *params);
+int nn_quasi_newton_optimizer(struct NNParams *params);
 
 #endif
 

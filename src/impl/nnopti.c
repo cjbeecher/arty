@@ -1,4 +1,5 @@
 #include "matrix.h"
+#include "nnopti.h"
 #include "nnactiv.h"
 #include "neural_network.h"
 #include <stdlib.h>
@@ -29,6 +30,7 @@ struct Matrix activity_prime(struct Matrix *a, struct Matrix *a_prime, struct Ma
 }
 
 struct Matrix *activities(struct NeuralNetwork *nn, struct Matrix *input) {
+	int index;
 	struct Matrix *as;
 	struct Matrix tmp_z;
 
@@ -46,12 +48,8 @@ struct Matrix *activities(struct NeuralNetwork *nn, struct Matrix *input) {
 	return as;
 }
 
-struct Matrix *nn_first_der_activity(struct NeuralNetwork *nn, struct Matrix *input, struct *output) {
-	int h;
-	int w;
+struct Matrix *nn_first_der_activity(struct NeuralNetwork *nn, struct Matrix *input, struct Matrix *output) {
 	int index;
-	int h_index;
-	int w_index;
 	int total;
 	double (*active_der)(double);
 	struct Matrix *as; // Activities array
@@ -60,25 +58,19 @@ struct Matrix *nn_first_der_activity(struct NeuralNetwork *nn, struct Matrix *in
 	active_der = &sigmoid_deriv;
 
 	total = 0;
-	for (layer = 0; layer < nn->layer_count + 1; layer++)
-		total += nn->weights[layer].h * nn->weights[layer].w;
+	for (index = 0; index < nn->layer_count + 1; index++)
+		total += nn->weights[index].h * nn->weights[index].w;
 
 	der = malloc(sizeof(struct Matrix) * total);
 	as = activities(nn, input);
 
-	for (index = 0; index < nn->layer_count; index++) {
-		h = nn->weights[index].h;
-		w = nn->weights[index].w;
-		for (h_index = 0; h_index < h; h_index++) {
-			for (h_index = 0; h_index < h; h_index++) {
-			}
-		}
+	for (index = 0; index < nn->layer_count + 1; index++) {
 	}
 
 	return der;
 }
 
-int nn_quasi_newton_optimizer(struct Params *params) {
+int nn_quasi_newton_optimizer(struct NNParams *params) {
 
 	return 0;
 }
