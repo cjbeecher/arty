@@ -102,7 +102,7 @@ struct Matrix *column_element_product(struct Matrix *left, struct Matrix *right)
 		out[index] = create_matrix(right->h, right->w);
 		for (h_index = 0; h_index < right->h; h_index++) {
 			for (w_index = 0; w_index < right->w; w_index++) {
-				out[index].values[h_index][w_index] = left->values[index][h_index] * right->values[w_index][h_index];
+				out[index].values[h_index][w_index] = left->values[h_index][index] * right->values[h_index][w_index];
 			}
 		}
 	}
