@@ -48,9 +48,9 @@ void initialize_weights(struct NeuralNetwork *nn) {
 struct Matrix process_data(struct NeuralNetwork *nn, struct Matrix *input) {
 	int index;
 	struct Matrix tmp;
-	struct Matrix output;
+	struct Matrix output = create_matrix(input->h, input->w);
 
-	output = *input;
+	copy_matrix(input, &output);
 	for (index = 0; index < nn->layer_count; index++) {
 		tmp = multiply_matrix(&output, &nn->weights[index]);
 		delete_matrix(&output);
