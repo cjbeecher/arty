@@ -3,9 +3,43 @@
 #include "nnactiv.h"
 #include "neural_network.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #define SIZE 1
 #define POINTS 100000
+
+void to_csv(struct Matrix *m) {
+	int size;
+	int h_index;
+	int w_index;
+	int exp = 9;
+	int v;
+	char *output;
+
+	size = m->h * m->w * exp;
+	size += m->h * (m->w - 1);
+	size += m->h;
+	output = malloc(sizeof(char) * size);
+
+	size = 0;
+	for (h_index = 0; h_index < m->h; h_index++) {
+		for (w_index = 0; w_index < m->w; w_index++) {
+			snprintf(&output[size], exp, "%f", m->values[h_index][w_index]);
+			size += exp - 1;
+			output[size] = ',';
+			size++;
+		}
+		output[size-1] = '\n';
+	}
+	output[size] = '\0';
+
+	FILE *f;
+	f = fopen("/home/cjbeecher/Documents/arty/test/data.csv", "w");
+	fputs(output, f);
+	fclose(f);
+
+	free(output);
+}
 
 int main() {
 	int i;
@@ -19,7 +53,7 @@ int main() {
 	struct Matrix output;
 	struct Matrix matrix = create_matrix(1, 2);
 	struct NNParams params;
-	struct Matrix csv = create_matrix_zeroes(POINTS, 12);
+	struct Matrix csv = create_matrix_zeroes(POINTS, 13);
 
 	matrix.values[0][0] = 10.123456;
 	// matrix.values[1][0] = 2.16;
@@ -54,14 +88,16 @@ int main() {
 				for (i = 0; i < POINTS; i++) {
 					nn.weights[wi].values[h_index][w_index] += 0.00001;
 					output = process_data(&nn, &matrix);
-					csv.values[i][s*2] = output.values[0][0];
+					csv.values[i][0] = nn.weights[wi].values[h_index][w_index];
+					csv.values[i][s*2+1] = output.values[0][0];
 					delete_matrix(&output);
 				}
 				s++;
 			}
 		}
 	}
-	print_matrix(&csv);
+	to_csv(&csv);
+	// print_matrix(&csv);
 	nn_quasi_newton_optimizer(&params);
 	for (index = 0; index < params.total; index++) {
 		// print_matrix(&params.primes[index]);
