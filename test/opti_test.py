@@ -4,14 +4,17 @@ pandas.set_option('display.width', 5000)
 
 
 data = pandas.read_csv('test/data.csv', header=None)
-columns = {i: 'dw_{0}'.format(i) if i % 2 == 1 else 'slope_{0}'.format(i) for i in range(1, len(data.columns)+1)}
-columns[0] = 'w'
+columns = {}
+for i in range(0, len(data.columns), 3):
+	columns[i] = 'w_{0}'.format(i)
+for i in range(1, len(data.columns), 3):
+	columns[i] = 'O_{0}'.format(i)
+for i in range(2, len(data.columns), 3):
+	columns[i] = 's_{0}'.format(i)
 data = data.rename(columns=columns)
 
-data = data.sort_values(by='w').set_index('w')
-
-for i in range(1, len(data.columns), 2):
-	data[[columns[i], columns[i+1]]].plot()
+for i in range(0, len(data.columns), 3):
+	data[[columns[i], columns[i+1], columns[i+2]]].plot(x=columns[i], y=[columns[i+1], columns[i+2]])
 	plt.draw()
 plt.show()
 

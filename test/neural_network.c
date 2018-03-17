@@ -41,6 +41,10 @@ void to_csv(struct Matrix *m) {
 	free(output);
 }
 
+float slopef(float s, float x, float y, float in) {
+	return s * (in - x) + y;
+}
+
 int main() {
 	int i;
 	int s;
@@ -48,12 +52,17 @@ int main() {
 	int index;
 	int h_index;
 	int w_index;
+	int mid = (int)(POINTS / 2);
+	float midf;
 	int size[SIZE] = {2};
+	float *slopes;
+	float *outs;
+	float *ins;
 	struct NeuralNetwork nn = create_feedforward_nn(2, 1, 1, size, &sigmoid);
 	struct Matrix output;
 	struct Matrix matrix = create_matrix(1, 2);
 	struct NNParams params;
-	struct Matrix csv = create_matrix_zeroes(POINTS, 13);
+	struct Matrix csv = create_matrix_zeroes(POINTS, 18);
 
 	matrix.values[0][0] = 10.123456;
 	// matrix.values[1][0] = 2.16;
@@ -88,14 +97,46 @@ int main() {
 				for (i = 0; i < POINTS; i++) {
 					nn.weights[wi].values[h_index][w_index] += 0.00001;
 					output = process_data(&nn, &matrix);
-					csv.values[i][0] = nn.weights[wi].values[h_index][w_index];
-					csv.values[i][s*2+1] = output.values[0][0];
+					csv.values[i][s*3] = nn.weights[wi].values[h_index][w_index];
+					csv.values[i][s*3+1] = output.values[0][0];
+					csv.values[i][s*3+2] = 0.0;
 					delete_matrix(&output);
 				}
 				s++;
 			}
 		}
 	}
+
+	s = 2;
+	for (wi = 0; wi < nn.layer_count + 1; wi++) {
+		for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
+			for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
+				midf = csv.values[mid][s-2];
+				nn.weights[wi].values[h_index][w_index] = midf;
+			}
+		}
+	}
+	nn_quasi_newton_optimizer(&params);
+	slopes = malloc(sizeof(float) * params.total);
+	outs = malloc(sizeof(float) * params.total);
+	ins = malloc(sizeof(float) * params.total);
+	for (i = 0; i < params.total; i++) {
+		ins[i] = csv.values[mid][i*3];
+		outs[i] = csv.values[mid][i*3+1];
+	}
+	for (i = 0; i < params.total; i++) {
+		slopes[i] = params.primes[i].values[0][0];
+		delete_matrix(&params.primes[i]);
+	}
+	for (i = 0; i < params.total; i++) {
+		for (index = 0; index < POINTS; index++) {
+			csv.values[index][i*3+2] = slopef(slopes[i], ins[i], outs[i], csv.values[index][i*3]);
+		}
+	}
+	free(slopes);
+	free(outs);
+	free(ins);
+
 	to_csv(&csv);
 	// print_matrix(&csv);
 	nn_quasi_newton_optimizer(&params);
