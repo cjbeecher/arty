@@ -1,4 +1,2 @@
+*.csv
 *.swp
-build/*
-./build_tests.sh
-*.py
