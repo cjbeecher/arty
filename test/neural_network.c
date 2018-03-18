@@ -5,7 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SIZE 1
+#define LAYERS 1
+#define LAYER_SIZES {2}
+#define INPUT 2
+#define INPUT_ROWS 1
+#define OUTPUT 1
+#define DIFF 0.05
+#define GRAN 0.0001
+
 
 void to_csv(struct Matrix *m) {
 	int size;
@@ -50,115 +57,101 @@ double inc(double x) {
 
 int main() {
 	int i;
-	int s;
 	int wi;
+	int mid;
 	int index;
+	int total;
+	int points;
 	int h_index;
 	int w_index;
-	double gran = 0.01;
-	double diff = 0.05;
-	int points = (int)(diff / gran) * 2;
-	int mid = (int)(points / 2);
-	double midf;
-	int size[SIZE] = {2};
-	double *slopes;
-	double *outs;
-	double *ins;
-	float inter;
-	int total;
-	struct NeuralNetwork nn = create_feedforward_nn(2, 1, 1, size, &sigmoid);
-	struct Matrix output;
-	struct Matrix matrix = create_matrix(1, 2);
-	struct NNParams params;
+	int layer_sizes[LAYERS] = LAYER_SIZES;
+	double tmp;
+	double inter;
+	struct NeuralNetwork nn;
 	struct Matrix csv;
+	struct Matrix input;
+	struct Matrix output;
+	struct NNParams params;
 
-	randomize_matrix(&matrix, 10.0);
-	matrix.values[0][0] = 10.123456;
-	// matrix.values[1][0] = 2.16;
-	// matrix.values[2][0] = 3.13456;
-	matrix.values[0][1] = 4.123456;
-	// matrix.values[1][1] = 5.123456;
-	// matrix.values[2][1] = 6.123456;
-	// matrix.values[3][0] = 4.0;
-	// matrix.values[3][1] = 5.0;
+	nn = create_feedforward_nn(INPUT, OUTPUT, LAYERS, layer_sizes, &sigmoid);
+	input = create_matrix(INPUT_ROWS, INPUT);
+	randomize_matrix(&input, 10.0);
+	total = 0;
+	for (index = 0; index < LAYERS + 1; index++) total += nn.weights[index].h * nn.weights[index].w;
+	points = (int)(DIFF * 2 / GRAN);
+	mid = (int)(points / 2);
+	csv = create_matrix(points, total * 3);
 
 	initialize_weights(&nn);
-	total = 0;
-	for (index = 0; index < nn.layer_count + 1; index++) {
-		total += nn.weights[index].h * nn.weights[index].w;
-		apply_function(&nn.weights[index], &inc);
-	}
-	total *= 3;
 
-	// print_matrix(&matrix);
-	// printf("\n");
-	for (index = 0; index < SIZE + 1; index++) {
-		// print_matrix(&nn.weights[index]);
-		// printf("\n");
-	}
-	output = process_data(&nn, &matrix);
-	// print_matrix(&output);
-
-	params.input = &matrix;
-	params.output = &output;
-	params.nn = &nn;
-
-	csv = create_matrix(points, total);
-	for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
-		for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
-			nn.weights[wi].values[h_index][w_index] -= diff;
-		}
-	}
-	for (index = 0; index < points; index++) {
-		output = process_data(&nn, &matrix);
-		i = 0;
+	i = 0;
+	for (wi = 0; wi < LAYERS + 1; wi++) {
 		for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
 			for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
-				csv.values[index][i*3] = nn.weights[wi].values[h_index][w_index];
-				csv.values[index][i*3+1] = output.values[0][0];
-				nn.weights[wi].values[h_index][w_index] += gran;
+				nn.weights[wi].values[h_index][w_index] -= DIFF;
+				for (index = 0; index < points; index++) {
+					csv.values[index][i*3] = nn.weights[wi].values[h_index][w_index];
+					nn.weights[wi].values[h_index][w_index] += GRAN;
+				}
 				i += 1;
 			}
 		}
-		delete_matrix(&output);
 	}
 	i = 0;
-	for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
-		for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
-			nn.weights[wi].values[h_index][w_index] = csv.values[mid][i*3];
-			i += 1;
+	for (wi = 0; wi < LAYERS + 1; wi++) {
+		for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
+			for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
+				nn.weights[wi].values[h_index][w_index] = csv.values[mid][i*3];
+				i++;
+			}
+		}
+	}
+	i = 0;
+	for (wi = 0; wi < LAYERS + 1; wi++) {
+		for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
+			for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
+				tmp = nn.weights[wi].values[h_index][w_index];
+				for (index = 0; index < points; index++) {
+					nn.weights[wi].values[h_index][w_index] = csv.values[index][i*3];
+					output = process_data(&nn, &input);
+					csv.values[index][i*3+1] = output.values[0][0];
+					delete_matrix(&output);
+				}
+				nn.weights[wi].values[h_index][w_index] = tmp;
+				i++;
+			}
 		}
 	}
 
+	params.input = &input;
+	params.nn = &nn;
 	nn_quasi_newton_optimizer(&params);
-	slopes = malloc(sizeof(double) * (params.total));
-	outs = malloc(sizeof(double) * (params.total));
-	ins = malloc(sizeof(double) * (params.total));
-	for (i = 0; i < params.total; i++) {
-		ins[i] = csv.values[mid][i*3];
-		outs[i] = csv.values[mid][i*3+1];
-	}
-	for (i = 0; i < params.total; i++) {
-		slopes[i] = params.primes[i].values[0][0];
-		delete_matrix(&params.primes[i]);
-	}
-	for (i = 0; i < params.total; i++) {
-		inter = outs[i] - ins[i] * slopes[i];
-		for (index = 0; index < points; index++) {
-			csv.values[index][i*3+2] = slopef(slopes[i], inter, csv.values[index][i*3]);
+	for (index = 0; index < total; index++) {
+		tmp = params.primes[index].values[0][0];
+		inter = csv.values[mid][index*3+1] - tmp * csv.values[mid][index*3];
+		for (i = 0; i < points; i++) {
+			csv.values[i][index*3+2] = slopef(tmp, inter, csv.values[i][index*3]);
 		}
-		printf("%f,", outs[i]);
 	}
-	printf("\n");
-	print_matrix(&matrix);
-	free(slopes);
-	free(outs);
-	free(ins);
-
 	to_csv(&csv);
-	delete_matrix(&matrix);
-	delete_matrix(&csv);
+
+	printf("== %i\n", mid);
+	print_matrix(&input);
+	printf("\n");
+	for (index = 0; index < params.nn->layer_count + 1; index++) {
+		print_matrix(&params.nn->weights[index]);
+		printf("\n");
+	}
+	printf("====\n");
+	for (index = 0; index < params.total; index++)
+		print_matrix(&params.primes[index]);
+	printf("\n");
+
 	delete_feedforward_nn(&nn);
+	delete_matrix(&input);
+	delete_matrix(&csv);
+	for (index = 0; index < total; index++) delete_matrix(&params.primes[index]);
+	free(params.primes);
 
 	return 0;
 }

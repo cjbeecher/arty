@@ -111,15 +111,6 @@ int nn_quasi_newton_optimizer(struct NNParams *params) {
 	prime = _nn_prime(params->nn, params->input, params->output, params->total);
 	params->primes = prime;
 
-for (index = 0; index < params->nn->layer_count + 1; index++) {
-	print_matrix(&params->nn->weights[index]);
-	printf("\n");
-}
-printf("====\n");
-for (index = 0; index < params->total; index++)
-	print_matrix(&params->primes[index]);
-printf("\n");
-
 	return 0;
 }
 
