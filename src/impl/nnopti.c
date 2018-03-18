@@ -36,14 +36,11 @@ struct Matrix *_activities(struct NeuralNetwork *nn, struct Matrix *input) {
 	int count;
 	struct Matrix a;
 	struct Matrix *as;
-	count = nn->layer_count + 1;
+	count = nn->layer_count;
 	as = malloc(sizeof(struct Matrix) * count);
 
-
-	as[0] = create_matrix(input->h, input->w);
-	copy_matrix(input, &as[0]);
-	as[1] = multiply_matrix(input, &nn->weights[0]);
-	for (index = 2; index < count; index++) {
+	as[0] = multiply_matrix(input, &nn->weights[0]);
+	for (index = 1; index < count; index++) {
 		a = create_matrix(as[index-1].h, as[index-1].w);
 		copy_matrix(&as[index-1], &a);
 		apply_function(&a, nn->activation_function);
@@ -54,20 +51,18 @@ struct Matrix *_activities(struct NeuralNetwork *nn, struct Matrix *input) {
 	return as;
 }
 
-struct Matrix _calc_prime(struct NeuralNetwork *nn, struct Matrix *as, struct Matrix *w_init, int init) {
+struct Matrix _calc_prime(struct NeuralNetwork *nn, struct Matrix *as, struct Matrix *prime, int init) {
 	int index;
 	struct Matrix tmp;
-	struct Matrix prime;
 
-	prime = multiply_matrix(&as[init], w_init);
-	tmp = prime;
-	for (index = init + 1; index < nn->layer_count + 1; index++) {
-		prime = _activity_prime(&as[index-1], &prime, &nn->weights[index], &sigmoid_deriv);
+	tmp = *prime;
+	for (index = init; index < nn->layer_count; index++) {
+		*prime = _activity_prime(&as[index], prime, &nn->weights[index+1], &sigmoid_deriv);
 		delete_matrix(&tmp);
-		tmp = prime;
+		tmp = *prime;
 	}
 
-	return prime;
+	return *prime;
 }
 
 struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct Matrix *output, int total) {
@@ -80,30 +75,22 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 	struct Matrix *as; // Layer activity
 	struct Matrix ap; // Layer activity prime
 	struct Matrix wp; // Weight prime
+	struct Matrix prime;
 
 	active_der = &sigmoid_deriv;
 
 	der = malloc(sizeof(struct Matrix) * total);
 	as = _activities(nn, input);
 
-	index = 0;
 	der_index = 0;
-	wp = create_matrix_zeroes(nn->weights[index].h, nn->weights[index].w);
-	for (h_index = 0; h_index < nn->weights[index].h; h_index++) {
-		for (w_index = 0; w_index < nn->weights[index].w; w_index++) {
-			wp.values[h_index][w_index] = 1.0;
-			der[der_index] = _calc_prime(nn, as, &wp, index);
-			wp.values[h_index][w_index] = 0.0;
-			der_index++;
-		}
-	}
-	delete_matrix(&wp);
-	for (index = 1; index < nn->layer_count + 1; index++) {
+	for (index = 0; index < nn->layer_count + 1; index++) {
 		wp = create_matrix_zeroes(nn->weights[index].h, nn->weights[index].w);
 		for (h_index = 0; h_index < nn->weights[index].h; h_index++) {
 			for (w_index = 0; w_index < nn->weights[index].w; w_index++) {
 				wp.values[h_index][w_index] = 1.0;
-				der[der_index] = _calc_prime(nn, as, &wp, index);
+				if (index == 0) prime = multiply_matrix(input, &wp);
+				else prime = multiply_matrix(&as[index-1], &wp);
+				der[der_index] = _calc_prime(nn, as, &prime, index);
 				wp.values[h_index][w_index] = 0.0;
 				der_index++;
 			}
@@ -125,6 +112,13 @@ int nn_quasi_newton_optimizer(struct NNParams *params) {
 	params->total = total;
 	prime = _nn_prime(params->nn, params->input, params->output, total);
 	params->primes = prime;
+
+// for (index = 0; index < params->nn->layer_count + 1; index++) {
+// 	print_matrix(&params->nn->weights[index]);
+// 	printf("\n");
+// }
+// print_matrix(&params->primes[2]);
+// print_matrix(&params->primes[3]);
 
 	return 0;
 }
