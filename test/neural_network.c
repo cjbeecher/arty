@@ -72,6 +72,7 @@ int main() {
 	struct NNParams params;
 	struct Matrix csv;
 
+	randomize_matrix(&matrix, 10.0);
 	matrix.values[0][0] = 10.123456;
 	// matrix.values[1][0] = 2.16;
 	// matrix.values[2][0] = 3.13456;
@@ -102,35 +103,33 @@ int main() {
 	params.output = &output;
 	params.nn = &nn;
 
-	s = 0;
-	delete_matrix(&output);
-	csv= create_matrix_zeroes(points, total);
-	for (wi = 0; wi < nn.layer_count + 1; wi++) {
+	csv = create_matrix(points, total);
+	for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
+		for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
+			nn.weights[wi].values[h_index][w_index] -= diff;
+		}
+	}
+	for (index = 0; index < points; index++) {
+		output = process_data(&nn, &matrix);
+		i = 0;
 		for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
 			for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
-				nn.weights[wi].values[h_index][w_index] -= diff;
-				for (i = 0; i < points; i++) {
-					nn.weights[wi].values[h_index][w_index] += gran;
-					output = process_data(&nn, &matrix);
-					csv.values[i][s*3] = nn.weights[wi].values[h_index][w_index];
-					csv.values[i][s*3+1] = output.values[0][0];
-					delete_matrix(&output);
-				}
-				s++;
+				csv.values[index][i*3] = nn.weights[wi].values[h_index][w_index];
+				csv.values[index][i*3+1] = output.values[0][0];
+				nn.weights[wi].values[h_index][w_index] += gran;
+				i += 1;
 			}
+		}
+		delete_matrix(&output);
+	}
+	i = 0;
+	for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
+		for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
+			nn.weights[wi].values[h_index][w_index] = csv.values[mid][i*3];
+			i += 1;
 		}
 	}
 
-	s = 0;
-	for (wi = 0; wi < nn.layer_count + 1; wi++) {
-		for (h_index = 0; h_index < nn.weights[wi].h; h_index++) {
-			for (w_index = 0; w_index < nn.weights[wi].w; w_index++) {
-				midf = csv.values[mid][s];
-				nn.weights[wi].values[h_index][w_index] = midf;
-				s += 3;
-			}
-		}
-	}
 	nn_quasi_newton_optimizer(&params);
 	slopes = malloc(sizeof(double) * (params.total));
 	outs = malloc(sizeof(double) * (params.total));
@@ -148,7 +147,10 @@ int main() {
 		for (index = 0; index < points; index++) {
 			csv.values[index][i*3+2] = slopef(slopes[i], inter, csv.values[index][i*3]);
 		}
+		printf("%f,", outs[i]);
 	}
+	printf("\n");
+	print_matrix(&matrix);
 	free(slopes);
 	free(outs);
 	free(ins);

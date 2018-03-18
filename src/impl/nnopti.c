@@ -103,22 +103,22 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 
 int nn_quasi_newton_optimizer(struct NNParams *params) {
 	int index;
-	int total;
 	struct Matrix *prime;
 
-	total = 0;
+	params->total = 0;
 	for (index = 0; index < params->nn->layer_count + 1; index++)
-		total += params->nn->weights[index].h * params->nn->weights[index].w;
-	params->total = total;
-	prime = _nn_prime(params->nn, params->input, params->output, total);
+		params->total += params->nn->weights[index].h * params->nn->weights[index].w;
+	prime = _nn_prime(params->nn, params->input, params->output, params->total);
 	params->primes = prime;
 
-// for (index = 0; index < params->nn->layer_count + 1; index++) {
-// 	print_matrix(&params->nn->weights[index]);
-// 	printf("\n");
-// }
-// print_matrix(&params->primes[2]);
-// print_matrix(&params->primes[3]);
+for (index = 0; index < params->nn->layer_count + 1; index++) {
+	print_matrix(&params->nn->weights[index]);
+	printf("\n");
+}
+printf("====\n");
+for (index = 0; index < params->total; index++)
+	print_matrix(&params->primes[index]);
+printf("\n");
 
 	return 0;
 }
