@@ -71,6 +71,7 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 	int w_index;
 	int der_index;
 	double (*active_der)(double);
+	struct Matrix a;
 	struct Matrix *der;
 	struct Matrix *as; // Layer activity
 	struct Matrix ap; // Layer activity prime
@@ -88,8 +89,16 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 		for (h_index = 0; h_index < nn->weights[index].h; h_index++) {
 			for (w_index = 0; w_index < nn->weights[index].w; w_index++) {
 				wp.values[h_index][w_index] = 1.0;
-				if (index == 0) prime = multiply_matrix(input, &wp);
-				else prime = multiply_matrix(&as[index-1], &wp);
+				if (index == 0) {
+					prime = multiply_matrix(input, &wp);
+				}
+				else {
+					a = create_matrix(as[index-1].h, as[index-1].w);
+					copy_matrix(&as[index-1], &a);
+					apply_function(&a, nn->activation_function);
+					prime = multiply_matrix(&a, &wp);
+					delete_matrix(&a);
+				}
 				der[der_index] = _calc_prime(nn, as, &prime, index);
 				wp.values[h_index][w_index] = 0.0;
 				der_index++;

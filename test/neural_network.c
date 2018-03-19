@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define LAYERS 1
-#define LAYER_SIZES {2}
+#define LAYERS 2
+#define LAYER_SIZES {2, 2}
 #define INPUT 2
 #define INPUT_ROWS 1
 #define OUTPUT 1
@@ -142,10 +142,10 @@ int main() {
 		print_matrix(&params.nn->weights[index]);
 		printf("\n");
 	}
-	printf("====\n");
-	for (index = 0; index < params.total; index++)
-		print_matrix(&params.primes[index]);
-	printf("\n");
+	// printf("====\n");
+	// for (index = 0; index < params.total; index++)
+	// 	print_matrix(&params.primes[index]);
+	// printf("\n");
 
 	delete_feedforward_nn(&nn);
 	delete_matrix(&input);
