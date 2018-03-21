@@ -187,8 +187,7 @@ int nn_gradient_descent(struct NeuralNetwork *nn, struct Matrix *input, struct M
 		total += nn->weights[index].h * nn->weights[index].w;
 	total = total;
 
-	iter = 0;
-	while (1) {
+	for (iter = 0; iter < 1000; iter++) {
 		primes = _calc_prime_err(nn, input, output, total);
 		i = 0;
 		for (index = 0; index < nn->layer_count + 1; index++) {
