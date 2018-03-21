@@ -111,14 +111,35 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 }
 
 int nn_quasi_newton_optimizer(struct NNParams *params) {
+	int i;
+	int p;
 	int index;
+	int h_index;
+	int w_index;
+	struct Matrix tmp;
 	struct Matrix *prime;
+	struct Matrix current;
 
 	params->total = 0;
 	for (index = 0; index < params->nn->layer_count + 1; index++)
 		params->total += params->nn->weights[index].h * params->nn->weights[index].w;
 	prime = _nn_prime(params->nn, params->input, params->output, params->total);
 	params->primes = prime;
+
+	i = 0;
+	current = process_data(params->nn, params->input);
+	for (index = 0; index < params->nn->layer_count + 1; index++) {
+		for (h_index = 0; h_index < params->nn->weights[index].h; h_index++) {
+			for (w_index = 0; w_index < params->nn->weights[index].w; w_index++) {
+				prime = &params->primes[i];
+				subtract_matrix(prime, params->output, 1);
+				//tmp = subtract_matrix(&current, params->output, 0);
+				//params->primes[i] = hadamard(&tmp, prime, 0);
+				//delete_matrix(&tmp);
+				i++;
+			}
+		}
+	}
 
 	return 0;
 }

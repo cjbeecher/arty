@@ -25,6 +25,7 @@ struct Matrix column_element_multiply(struct Matrix *matrix, struct Matrix *colu
 void randomize_matrix(struct Matrix *matrix, double range);
 void apply_function(struct Matrix *matrix, double (*handle)(double));
 
+struct Matrix hadamard(struct Matrix *left, struct Matrix *right, int put_left);
 struct Matrix transpose(struct Matrix *matrix);
 double determinant(struct Matrix *matrix);
 // Minor matrix is placed into minor

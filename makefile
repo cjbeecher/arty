@@ -58,6 +58,8 @@ GRAPHTESTC=test/graph.c
 GRAPHTEST=-o build/graph_test
 NNTESTC=test/neural_network.c
 NNTEST=-o build/nn_test
+NNOPTITESTC=test/neural_network.c
+NNOPTITEST=-o build/nn_test
 
 matrix_test : matrix
 	$(CC) $(INCLUDE) -fPIC -g $(MATRIXTESTC) $(MATRIXTEST) $(MATRIXSO) $(STATSSO) -lm
@@ -70,6 +72,9 @@ graph_test : graph
 
 nn_test : neural nnopti nnactiv
 	$(CC) $(INCLUDE) -fPIC -g $(NNTESTC) $(NNTEST) $(NNSO) $(NNOPTISO) $(NNACTIVSO) $(MATRIXSO) $(STATSSO) -lm
+
+nn_opti_test : neural nnopti nnactiv
+	$(CC) $(INCLUDE) -fPIC -g $(NNOPTITESTC) $(NNOPTITEST) $(NNSO) $(NNOPTISO) $(NNACTIVSO) $(MATRIXSO) $(STATSSO) -lm
 
 clean :
 	rm build/*

@@ -172,6 +172,23 @@ void copy_matrix(struct Matrix *matrix, struct Matrix *copy) {
 	}
 }
 
+struct Matrix hadamard(struct Matrix *left, struct Matrix *right, int put_left) {
+	int h_index;
+	int w_index;
+	struct Matrix had;
+
+	if (put_left) had = *left;
+	else had = create_matrix(left->h, left->w);
+
+	for (h_index = 0; h_index < left->h; h_index++) {
+		for (w_index = 0; w_index < left->w; w_index++) {
+			had.values[h_index][w_index] = left->values[h_index][w_index] * right->values[h_index][w_index];
+		}
+	}
+
+	return had;
+}
+
 struct Matrix transpose(struct Matrix *matrix) {
 	int h_index;
 	int w_index;

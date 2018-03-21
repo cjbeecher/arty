@@ -22,7 +22,7 @@ vsplit src/header/neural_network.h
 " split src/header/graph.h
 
 tabe src/impl/nnopti.c
-vsplit test/neural_network.c
+vsplit test/nnopti.c
 split src/header/nnopti.h
 
 tabe src/impl/nnactiv.c
