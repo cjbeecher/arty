@@ -56,9 +56,9 @@ MATRIXTESTC=test/matrix.c
 MATRIXTEST=-o build/matrix_test
 GRAPHTESTC=test/graph.c
 GRAPHTEST=-o build/graph_test
-NNTESTC=test/neural_network.c
+NNTESTC=test/nntest2.c
 NNTEST=-o build/nn_test
-NNOPTITESTC=test/neural_network.c
+NNOPTITESTC=test/nnopti.c
 NNOPTITEST=-o build/nn_test
 
 matrix_test : matrix

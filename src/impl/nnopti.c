@@ -110,38 +110,107 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 	return der;
 }
 
-int nn_quasi_newton_optimizer(struct NNParams *params) {
+struct Matrix *_calc_prime_err(struct NeuralNetwork *nn, struct Matrix *input, struct Matrix *output, int total) {
 	int i;
-	int p;
 	int index;
 	int h_index;
 	int w_index;
 	struct Matrix tmp;
 	struct Matrix *prime;
+	struct Matrix *primes;
 	struct Matrix current;
 
-	params->total = 0;
-	for (index = 0; index < params->nn->layer_count + 1; index++)
-		params->total += params->nn->weights[index].h * params->nn->weights[index].w;
-	prime = _nn_prime(params->nn, params->input, params->output, params->total);
-	params->primes = prime;
+	primes = _nn_prime(nn, input, output, total);
 
 	i = 0;
-	current = process_data(params->nn, params->input);
-	for (index = 0; index < params->nn->layer_count + 1; index++) {
-		for (h_index = 0; h_index < params->nn->weights[index].h; h_index++) {
-			for (w_index = 0; w_index < params->nn->weights[index].w; w_index++) {
-				prime = &params->primes[i];
-				subtract_matrix(prime, params->output, 1);
-				//tmp = subtract_matrix(&current, params->output, 0);
-				//params->primes[i] = hadamard(&tmp, prime, 0);
-				//delete_matrix(&tmp);
+	current = process_data(nn, input);
+	for (index = 0; index < nn->layer_count + 1; index++) {
+		for (h_index = 0; h_index < nn->weights[index].h; h_index++) {
+			for (w_index = 0; w_index < nn->weights[index].w; w_index++) {
+				prime = &primes[i];
+				subtract_matrix(prime, output, 1);
+				tmp = subtract_matrix(&current, output, 0);
+				primes[i] = hadamard(&tmp, prime, 0);
+				delete_matrix(&tmp);
 				i++;
 			}
 		}
 	}
+	delete_matrix(&current);
 
-	return 0;
+	return primes;
+}
+
+void _delete_primes(struct Matrix *primes, int total) {
+	int index;
+
+	for (index = 0; index < total; index++) {
+		delete_matrix(&primes[index]);
+	}
+}
+
+double _avg_err(struct Matrix *adjusted, struct Matrix *output) {
+	int h_index;
+	int w_index;
+	double err;
+	double tmp = 0.0;
+	struct Matrix diff;
+
+	diff = subtract_matrix(adjusted, output, 1);
+	for (h_index = 0; h_index < adjusted->h; h_index++) {
+		for (w_index = 0; w_index < adjusted->w; w_index++) {
+			tmp = diff.values[h_index][w_index];
+			tmp = tmp < 0.0 ? -1.0 * tmp : tmp;
+			err += tmp;
+		}
+	}
+
+	return err / (diff.h * diff.w);
+}
+
+int nn_gradient_descent(struct NeuralNetwork *nn, struct Matrix *input, struct Matrix *output, double tol) {
+	int i;
+	int col;
+	int row;
+	int iter;
+	int index;
+	int total;
+	int h_index;
+	int w_index;
+	double lr = 0.01;
+	double err;
+	struct Matrix *primes;
+	struct Matrix adjusted;
+
+	total = 0;
+	for (index = 0; index < nn->layer_count + 1; index++)
+		total += nn->weights[index].h * nn->weights[index].w;
+	total = total;
+
+	iter = 0;
+	while (1) {
+		primes = _calc_prime_err(nn, input, output, total);
+		i = 0;
+		for (index = 0; index < nn->layer_count + 1; index++) {
+			for (h_index = 0; h_index < nn->weights[index].h; h_index++) {
+				for (w_index = 0; w_index < nn->weights[index].w; w_index++) {
+					for (row = 0; row < output->h; row++) {
+						for (col = 0; col < output->w; col++) {
+							nn->weights[index].values[h_index][w_index] += primes[i].values[row][col] * lr;
+						}
+					}
+				}
+			}
+		}
+		adjusted = process_data(nn, input);
+		err = _avg_err(&adjusted, output);
+		delete_matrix(&adjusted);
+		_delete_primes(primes, total);
+		free(primes);
+		if (err <= tol) break;
+	}
+
+	return iter;
 }
 
 #endif
