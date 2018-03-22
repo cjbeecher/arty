@@ -4,6 +4,7 @@
 #include "neural_network.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define LAYERS 1
 #define LAYER_SIZES {2}
@@ -42,7 +43,11 @@ int main() {
 	output.values[2][0] = 1.0;
 	output.values[3][0] = 0.0;
 
-	index = nn_gradient_descent(&nn, &input, &output, TOL);
+	for (index = 0; index < 1000; index++) {
+		nn_gradient_descent(&nn, &input, &output, TOL);
+		printf("= %i\n", index+1);
+		sleep(1);
+	}
 	adjusted = process_data(&nn, &input);
 	print_matrix(&adjusted);
 

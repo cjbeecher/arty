@@ -3,10 +3,12 @@
 #include "nnactiv.h"
 #include "neural_network.h"
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 
 
 int main() {
+	int index;
 	int layers[1] = {2};
 	struct Matrix input;
 	struct Matrix output;
@@ -19,12 +21,16 @@ int main() {
 	input.values[0][1] = 0.0;
 	// print_matrix(&input);
 
-	output = process_data(&nn, &input);
-	print_matrix(&output);
+	for (index = 0; index < 100000; index++) {
+		output = process_data(&nn, &input);
+		delete_matrix(&output);
+		sleep(1);
+		printf("= %i\n", index+1);
+	}
+	// print_matrix(&output);
 
 	delete_feedforward_nn(&nn);
-	delete_matrix(&input);
-	delete_matrix(&output);
+	// delete_matrix(&input);
 
 	return 0;
 }

@@ -130,7 +130,7 @@ struct Matrix *_calc_prime_err(struct NeuralNetwork *nn, struct Matrix *input, s
 				prime = &primes[i];
 				subtract_matrix(prime, output, 1);
 				tmp = subtract_matrix(&current, output, 0);
-				primes[i] = hadamard(&tmp, prime, 0);
+				primes[i] = hadamard(prime, &tmp, 0);
 				delete_matrix(&tmp);
 				i++;
 			}
