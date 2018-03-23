@@ -2,11 +2,19 @@
 #include "nnopti.h"
 #include "nnactiv.h"
 #include "neural_network.h"
+#include <time.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #ifndef P_NNOPTI_C
 #define P_NNOPTI_C
+
+typedef double (*ActiveDeriv)(double);
+
+ActiveDeriv _find_active_der(double (*active)(double)) {
+	if (active == sigmoid)
+		return sigmoid_deriv;
+	return sigmoid_deriv;
+}
 
 // ap1 = z0p (a0pT * w1)
 // struct Matrix *matrix, double (*handle)(double)
@@ -51,30 +59,27 @@ struct Matrix *_activities(struct NeuralNetwork *nn, struct Matrix *input) {
 	return as;
 }
 
-void _calc_prime(struct NeuralNetwork *nn, struct Matrix *as, struct Matrix *prime, int init) {
+void _calc_prime(struct NeuralNetwork *nn, struct Matrix *as, struct Matrix *prime, int init, double (*active_der)(double)) {
 	int index;
 	struct Matrix tmp;
 
 	for (index = init; index < nn->layer_count; index++) {
-		tmp = _activity_prime(&as[index], prime, &nn->weights[index+1], &sigmoid_deriv);
+		tmp = _activity_prime(&as[index], prime, &nn->weights[index+1], active_der);
 		copy_matrix(&tmp, prime);
 		delete_matrix(&tmp);
 	}
 }
 
-struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct Matrix *output, int total) {
+struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct Matrix *output, int total, double (*active_der)(double)) {
 	int index;
 	int h_index;
 	int w_index;
 	int der_index;
-	double (*active_der)(double);
 	struct Matrix a;
 	struct Matrix *der;
 	struct Matrix *as; // Layer activity
 	struct Matrix ap; // Layer activity prime
 	struct Matrix wp; // Weight prime
-
-	active_der = &sigmoid_deriv;
 
 	der = malloc(sizeof(struct Matrix) * total);
 	as = _activities(nn, input);
@@ -95,7 +100,7 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 					der[der_index] = multiply_matrix(&a, &wp);
 					delete_matrix(&a);
 				}
-				_calc_prime(nn, as, &der[der_index], index);
+				_calc_prime(nn, as, &der[der_index], index, active_der);
 				wp.values[h_index][w_index] = 0.0;
 				der_index++;
 			}
@@ -109,7 +114,7 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 	return der;
 }
 
-struct Matrix *_calc_prime_err(struct NeuralNetwork *nn, struct Matrix *input, struct Matrix *output, int total) {
+struct Matrix *_calc_prime_err(struct NeuralNetwork *nn, struct Matrix *input, struct Matrix *output, int total, double (*active_der)(double)) {
 	int i;
 	int index;
 	int h_index;
@@ -119,7 +124,7 @@ struct Matrix *_calc_prime_err(struct NeuralNetwork *nn, struct Matrix *input, s
 	struct Matrix *primes;
 	struct Matrix current;
 
-	primes = _nn_prime(nn, input, output, total);
+	primes = _nn_prime(nn, input, output, total, active_der);
 
 	i = 0;
 	current = process_data(nn, input);
@@ -176,25 +181,33 @@ int nn_gradient_descent(struct NeuralNetwork *nn, struct Matrix *input, struct M
 	int total;
 	int h_index;
 	int w_index;
-	double lr = 1.0;
+	int *select;
+	double lr = 0.01;
 	double err;
+	double (*active_der)(double);
 	struct Matrix *primes;
 	struct Matrix adjusted;
+
+	active_der = _find_active_der(nn->activation_function);
 
 	total = 0;
 	for (index = 0; index < nn->layer_count + 1; index++)
 		total += nn->weights[index].h * nn->weights[index].w;
 	total = total;
 
-	for (iter = 0; iter < 1000000; iter++) {
-		primes = _calc_prime_err(nn, input, output, total);
+	srand(time(NULL));
+	select = malloc(sizeof(int) * output->h);
+	for (iter = 0; iter < 1000; iter++) {
 		i = 0;
+		primes = _calc_prime_err(nn, input, output, total, active_der);
+		for (row = 0; row < output->h; row++) select[row] = rand() % (output->h - row);
 		for (index = 0; index < nn->layer_count + 1; index++) {
 			for (h_index = 0; h_index < nn->weights[index].h; h_index++) {
 				for (w_index = 0; w_index < nn->weights[index].w; w_index++) {
-					for (row = 0; row < output->h; row++) {
-						for (col = 0; col < output->w; col++) {
-							nn->weights[index].values[h_index][w_index] += primes[i].values[row][col] * lr;
+					for (col = 0; col < output->w; col++) {
+						for (row = 0; row < output->h; row++) {
+							nn->weights[index].values[h_index][w_index]
+								+= primes[i].values[select[row]][col] * lr;
 						}
 					}
 				}
