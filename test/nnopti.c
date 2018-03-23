@@ -17,6 +17,7 @@
 
 
 int main() {
+	int iter;
 	int index;
 	int h_index;
 	int w_index;
@@ -43,20 +44,16 @@ int main() {
 	output.values[2][0] = 1.0;
 	output.values[3][0] = 0.0;
 
-	for (index = 0; index < 1000; index++) {
-		nn_gradient_descent(&nn, &input, &output, TOL);
-		printf("= %i\n", index+1);
-		sleep(1);
-	}
+	iter = nn_gradient_descent(&nn, &input, &output, TOL);
+
 	adjusted = process_data(&nn, &input);
 	print_matrix(&adjusted);
+	printf("Iterations: %i\n", iter);
 
 	delete_feedforward_nn(&nn);
 	delete_matrix(&input);
 	delete_matrix(&output);
 	delete_matrix(&adjusted);
-
-	printf("Iterations: %i\n", index);
 
 	return 0;
 }
