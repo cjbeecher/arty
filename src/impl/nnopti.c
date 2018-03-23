@@ -51,18 +51,15 @@ struct Matrix *_activities(struct NeuralNetwork *nn, struct Matrix *input) {
 	return as;
 }
 
-struct Matrix _calc_prime(struct NeuralNetwork *nn, struct Matrix *as, struct Matrix *prime, int init) {
+void _calc_prime(struct NeuralNetwork *nn, struct Matrix *as, struct Matrix *prime, int init) {
 	int index;
 	struct Matrix tmp;
 
-	tmp = *prime;
 	for (index = init; index < nn->layer_count; index++) {
-		*prime = _activity_prime(&as[index], prime, &nn->weights[index+1], &sigmoid_deriv);
+		tmp = _activity_prime(&as[index], prime, &nn->weights[index+1], &sigmoid_deriv);
+		copy_matrix(&tmp, prime);
 		delete_matrix(&tmp);
-		tmp = *prime;
 	}
-
-	return *prime;
 }
 
 struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct Matrix *output, int total) {
@@ -76,7 +73,6 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 	struct Matrix *as; // Layer activity
 	struct Matrix ap; // Layer activity prime
 	struct Matrix wp; // Weight prime
-	struct Matrix prime;
 
 	active_der = &sigmoid_deriv;
 
@@ -90,22 +86,25 @@ struct Matrix *_nn_prime(struct NeuralNetwork *nn, struct Matrix *input, struct 
 			for (w_index = 0; w_index < nn->weights[index].w; w_index++) {
 				wp.values[h_index][w_index] = 1.0;
 				if (index == 0) {
-					prime = multiply_matrix(input, &wp);
+					der[der_index] = multiply_matrix(input, &wp);
 				}
 				else {
 					a = create_matrix(as[index-1].h, as[index-1].w);
 					copy_matrix(&as[index-1], &a);
 					apply_function(&a, nn->activation_function);
-					prime = multiply_matrix(&a, &wp);
+					der[der_index] = multiply_matrix(&a, &wp);
 					delete_matrix(&a);
 				}
-				der[der_index] = _calc_prime(nn, as, &prime, index);
+				_calc_prime(nn, as, &der[der_index], index);
 				wp.values[h_index][w_index] = 0.0;
 				der_index++;
 			}
 		}
 		delete_matrix(&wp);
 	}
+	for (index = 0; index < nn->layer_count; index++)
+		delete_matrix(&as[index]);
+	free(as);
 
 	return der;
 }
@@ -130,7 +129,7 @@ struct Matrix *_calc_prime_err(struct NeuralNetwork *nn, struct Matrix *input, s
 				prime = &primes[i];
 				subtract_matrix(prime, output, 1);
 				tmp = subtract_matrix(&current, output, 0);
-				primes[i] = hadamard(prime, &tmp, 0);
+				hadamard(prime, &tmp, 1);
 				delete_matrix(&tmp);
 				i++;
 			}
