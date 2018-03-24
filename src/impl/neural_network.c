@@ -39,7 +39,6 @@ void delete_feedforward_nn(struct NeuralNetwork *nn) {
 
 void initialize_weights(struct NeuralNetwork *nn) {
 	int index;
-	srand(time(NULL));
 
 	for (index = 0; index < nn->layer_count + 1; index++)
 		randomize_matrix(&nn->weights[index], RADIAL_RANGE);

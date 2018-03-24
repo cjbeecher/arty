@@ -197,7 +197,7 @@ int nn_gradient_descent(struct NeuralNetwork *nn, struct Matrix *input, struct M
 
 	srand(time(NULL));
 	select = malloc(sizeof(int) * output->h);
-	for (iter = 0; iter < 1000; iter++) {
+	for (iter = 0; iter < 1000000; iter++) {
 		i = 0;
 		primes = _calc_prime_err(nn, input, output, total, active_der);
 		for (row = 0; row < output->h; row++) select[row] = rand() % (output->h - row);
