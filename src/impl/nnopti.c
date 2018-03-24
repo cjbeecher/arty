@@ -195,31 +195,12 @@ int nn_gradient_descent(struct NeuralNetwork *nn, struct Matrix *input, struct M
 		total += nn->weights[index].h * nn->weights[index].w;
 	total = total;
 
-	srand(time(NULL));
-	select = malloc(sizeof(int) * output->h);
-	for (iter = 0; iter < 1000000; iter++) {
-		i = 0;
-		primes = _calc_prime_err(nn, input, output, total, active_der);
-		for (row = 0; row < output->h; row++) select[row] = rand() % (output->h - row);
-		for (index = 0; index < nn->layer_count + 1; index++) {
-			for (h_index = 0; h_index < nn->weights[index].h; h_index++) {
-				for (w_index = 0; w_index < nn->weights[index].w; w_index++) {
-					for (col = 0; col < output->w; col++) {
-						for (row = 0; row < output->h; row++) {
-							nn->weights[index].values[h_index][w_index]
-								+= primes[i].values[select[row]][col] * lr;
-						}
-					}
-				}
-			}
-		}
-		adjusted = process_data(nn, input);
-		err = _avg_err(&adjusted, output);
-		delete_matrix(&adjusted);
-		_delete_primes(primes, total);
-		free(primes);
-		if (err <= tol) break;
-	}
+	primes = _calc_prime_err(nn, input, output, total, active_der);
+	adjusted = process_data(nn, input);
+	err = _avg_err(&adjusted, output);
+	delete_matrix(&adjusted);
+	_delete_primes(primes, total);
+	free(primes);
 
 	return iter;
 }
