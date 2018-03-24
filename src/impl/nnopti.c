@@ -65,6 +65,8 @@ void _calc_prime(struct NeuralNetwork *nn, struct Matrix *as, struct Matrix *pri
 
 	for (index = init; index < nn->layer_count; index++) {
 		tmp = _activity_prime(&as[index], prime, &nn->weights[index+1], active_der);
+		delete_matrix(prime);
+		*prime = create_matrix(tmp.h, tmp.w);
 		copy_matrix(&tmp, prime);
 		delete_matrix(&tmp);
 	}
